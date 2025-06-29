@@ -1,6 +1,10 @@
 import os
 
 class Piece:
+    
+    '''
+    the pieces class where we get the images from the image files
+    '''
     def __init__(self,name,color,value,texture=None,texture_rect=None):
         self.name = name 
         self.color = color 
@@ -15,6 +19,9 @@ class Piece:
         self.texture_rect = texture_rect
     
     def set_texture(self,size=80):
+        '''
+        we are grabbing the image from the file depending on the name we are going to pass
+        '''
         self.texture = os.path.join(
             f'images/imgs-{size}px/{self.color}_{self.name}.png'
         )
@@ -23,7 +30,7 @@ class Piece:
         self.moves.append(move)
     
 class Pawn(Piece):
-    
+    # the pawns get a direction depending if they are white or black
     def __init__(self,color):
         self.dir = -1 if color == 'white' else 1
         super().__init__('pawn', color, 1.0,)

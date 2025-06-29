@@ -7,6 +7,7 @@ from piece import *
 class Board:
     
     def __init__(self):
+        #the chess squares represented in a 2 dimension arrays containing zeros
         self.squares =[[0,0,0,0,0,0,0,0] for col in range(BOARD_COLS)]
         self._create()
         self._add_pieces('white')
@@ -15,12 +16,14 @@ class Board:
     
     
     def _create(self):
-
-        for row in range(BOARD_COLS):
+        #we are going through all the rows and column of the board
+        for row in range(BOARD_ROWS):
             for col in range(BOARD_COLS):
+                # we are creating squares depending on the row and column in the array
                 self.squares[row][col] = Square(row,col)
 
     def _add_pieces(self,color):
+        #placing the pawns on their respective rows depending on their colors
         row_pawn,row_other = (6,7) if color == 'white' else (1,0)
         
         # pawns
