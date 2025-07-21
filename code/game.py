@@ -5,29 +5,54 @@ this area is responsible for all the rendering methods
 from settings import *
 from board import Board
 from dragger import Dragger
+from config import Config
+from square import Square
 class Game:
 
     def __init__(self):
         
         #create a board
+        self.next_player = 'white'
+        self.hovered_sqr = None
         self.board = Board()
         self.dragger = Dragger()
+        self.config = Config()
 
     # show methods
     def show_bg(self, surface):
+        theme= self.config.theme
         #draw the chess board 
         for row in range(BOARD_ROWS):
             for col in range(BOARD_COLS):
+                color = theme.bg.light if (row + col) % 2 == 0 else theme.bg.dark
 
-                if (row + col) % 2 == 0:
-                    color = COLORS["beige"]
-                else:
-                    color = COLORS["green"]
+
                 # creating a rect depending on the square size we specify
                 rect = (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
                 # we draw a rect 
                 pygame.draw.rect(surface, color, rect)
                 
+                # row coordinated 
+                if col == 0:
+                    #color 
+                    color = theme.bg.dark if row %2 == 0 else theme.bg.light
+                    #label 
+                    
+                    lbl = self.config.font.render(str(BOARD_ROWS-row),1,color)
+                    lbl_pos = (5,5 + row * SQUARE_SIZE)
+                    
+                    #show labels
+                    surface.blit(lbl,lbl_pos)
+                if row == 7:
+                    #color 
+                    color = theme.bg.dark if (row +col) %2 == 0 else theme.bg.light
+                    #label 
+                    
+                    lbl = self.config.font.render(Square.get_alphacol(col),1,color)
+                    lbl_pos = (col * SQUARE_SIZE + SQUARE_SIZE -20,WINDOW_HEIGHT - 20)
+                    
+                    #show labels
+                    surface.blit(lbl,lbl_pos)
                 
     def show_pieces(self, surface):
         
@@ -47,4 +72,66 @@ class Game:
                         surface.blit(img,piece.texture_rect)
                     
                     
+    def show_moves(self,surf):
+        theme= self.config.theme
+        
+        if self.dragger.dragging:
+            piece = self.dragger.piece
+            
+            #loop all valid moves
+            for move in piece.moves:
+                # give it a color
+                color =theme.moves.light if (move.final.row + move.final.col) % 2 == 0 else theme.moves.dark
+                #rect
+                rect = (move.final.col * SQUARE_SIZE, move.final.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+ 
+                #blit or draw
+                pygame.draw.rect(surf, color, rect)
+                
+    def show_last_move(self,surf):
+        theme= self.config.theme
+        
+        if self.board.last_move:
+            initial = self.board.last_move.initial 
+            final = self.board.last_move.final
+            
+            for pos in [initial,final]:
+                #
+                # give it a color
+                color =theme.trace.light if (pos.row + pos.col) % 2 == 0 else theme.trace.dark
+                #rect
+                rect = (pos.col * SQUARE_SIZE, pos.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+ 
+                #blit or draw
+                pygame.draw.rect(surf, color, rect)    
+                
+    def show_hover(self,surf):
+        if self.hovered_sqr:
+                # give it a color
+                color =(180,180,180) 
+                #rect
+                rect = (self.hovered_sqr.col * SQUARE_SIZE, self.hovered_sqr.row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+ 
+                #blit or draw
+                pygame.draw.rect(surf, color, rect,width=3)    
+    
 
+    def next_turn(self):
+        self.next_player = 'white' if self.next_player == 'black' else 'black'
+        
+    def set_hover(self,row,col):
+        self.hovered_sqr = self.board.squares[row][col]
+        
+    def change_theme(self):
+        self.config.change_theme()
+        
+    def play_sound(self,captured=False):
+        if captured:
+            self.config.capture_sound.play()
+        else:
+            self.config.move_sound.play()
+            
+        
+    def reset(self):
+        self.__init__()
+                    
